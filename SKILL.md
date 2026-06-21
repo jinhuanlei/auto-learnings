@@ -75,6 +75,8 @@ Capture learning?
 
 ### Step 5 — Write
 
+For a project-scoped entry, first note whether `./.learnings/project.md` already exists — Step 6 needs to know whether this capture is what created it. Then run:
+
 ```sh
 sh ~/.claude/skills/auto-learnings/log-learning.sh \
   --scope   <global|project> \
@@ -84,6 +86,28 @@ sh ~/.claude/skills/auto-learnings/log-learning.sh \
 ```
 
 If the script exits non-zero, report the error message to the user and stop. Do not write the entry directly as a fallback — the script exists to guarantee correct formatting.
+
+### Step 6 — Offer project recall wiring (first project capture only)
+
+This step fires **only** when the entry was project-scoped **and** `./.learnings/project.md` did not exist before Step 5 (i.e., this capture just created it). If the file already existed, skip — the repo was offered wiring before, so don't nag.
+
+Project learnings are only read at session start if some config tells the agent to read `./.learnings/project.md`. Global setup already does this for you on this machine — but a teammate, or you on another machine, without global setup won't pick them up. Offer to wire recall into a **local, gitignored** config file, which is safe because it's never committed and doesn't affect the repo for anyone else:
+
+> "Logged your first project learning here. Want me to add a recall note to this repo's `CLAUDE.local.md` (personal, gitignored — not committed) so these learnings load automatically each session, even without global setup? yes / no
+> (Prefer to share them with teammates instead? I can add it to the committed `CLAUDE.md` / `AGENTS.md` — just say so.)"
+
+- **yes** → append the managed block below to the local config for your agent: `./CLAUDE.local.md` for Claude Code, `./AGENTS.local.md` otherwise. Create the file if missing. Show the diff first, then write on confirm. If the user instead asked for the shared/committed file, target `./CLAUDE.md` or `./AGENTS.md` and warn that it will be version-controlled.
+- **no** → skip silently. `project.md` now exists, so this step won't fire again for this repo.
+
+Managed block (project recall — the project counterpart to the global block in Setup mode):
+
+```markdown
+<!-- BEGIN learnings-skill project recall (managed) -->
+## Project Learnings (auto-memory)
+At the start of each session, read `./.learnings/project.md` if it exists and
+treat its contents as persistent memory you must respect for this project.
+<!-- END learnings-skill project recall -->
+```
 
 ## Your agent tag
 

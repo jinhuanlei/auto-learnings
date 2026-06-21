@@ -157,6 +157,8 @@ Entries are plain text and fully editable by hand.
 
 After setup, the managed block in `AGENTS.md` instructs the agent to read both learnings files at the start of every session. No extra commands needed — learnings are automatically in context.
 
+The global block already points at `./.learnings/project.md`, so any repo's project learnings are picked up automatically on this machine. The **first time** a project learning is captured in a repo, the agent also offers to add a recall note to that repo's `CLAUDE.local.md` / `AGENTS.local.md` (personal and gitignored — never committed). This is optional and only useful if you want the learnings to load even without global setup (e.g. on another machine). Decline and nothing is written; you're only asked once per repo.
+
 ---
 
 ## Install
