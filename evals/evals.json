@@ -1,0 +1,44 @@
+{
+  "skill_name": "auto-learnings",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I've been working with you on this project for a bit and I notice you keep trying to use `npm install` to add dependencies. Just so you know — this project uses yarn, not npm. We made the switch six months ago and npm doesn't work with our lockfile.",
+      "expected_output": "Agent should recognize the correction, propose capturing it as a project-scoped Corrections entry, show the structured confirmation block (Scope/Section/Text + yes/no/edit), and invoke log-learning.sh on confirmation.",
+      "files": [],
+      "assertions": [
+        "Agent shows a structured 'Capture learning?' confirmation block with Scope, Section, and Text fields",
+        "The proposed Section is 'Corrections' or 'Project Facts'",
+        "The proposed Scope is 'project' (this is a project-specific convention)",
+        "The block includes 'yes / no / edit' options",
+        "Agent does NOT write the entry without asking first"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Set up learnings for me.",
+      "expected_output": "Agent should run setup mode: create ~/.learnings/global.md with the four-section skeleton, read ~/.config/opencode/AGENTS.md, propose where to insert the managed block, show the diff, and ask for confirmation before writing anything.",
+      "files": [],
+      "assertions": [
+        "Agent creates or proposes creating ~/.learnings/global.md with the four-section skeleton (Corrections, Preferences, Project Facts, Debug Insights)",
+        "Agent references ~/.config/opencode/AGENTS.md as the target for the recall wiring block",
+        "Agent shows the exact content of the managed block (including BEGIN/END markers)",
+        "Agent asks for confirmation before writing to AGENTS.md",
+        "Agent does NOT write to any file without showing the user what it will write"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Show me all my learnings.",
+      "expected_output": "Agent should read ~/.learnings/global.md and ./.learnings/project.md (if it exists) and display both files organized by section, noting which file each section comes from.",
+      "files": [],
+      "assertions": [
+        "Agent attempts to read ~/.learnings/global.md",
+        "Agent attempts to read ./.learnings/project.md",
+        "Agent displays content organized by section (Corrections, Preferences, Project Facts, Debug Insights)",
+        "Agent notes which file (global vs project) each section comes from",
+        "Agent handles the case where one or both files do not exist gracefully (no crash)"
+      ]
+    }
+  ]
+}
