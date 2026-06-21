@@ -1,4 +1,4 @@
-# Handoff: Cross-Agent Auto-Learning Skill
+# Handoff: auto-learnings Skill
 
 Portable handoff for picking this project up on a different agent or machine.
 
@@ -7,20 +7,33 @@ Portable handoff for picking this project up on a different agent or machine.
 A custom agent **skill** that auto-captures "learnings" during coding sessions —
 corrections, preferences, project facts, and debug insights — and persists them to an
 **agent-agnostic** markdown store so future sessions (across opencode, Claude Code,
-Cursor, Copilot, etc.) "remember." Inspired by Claude Code's native auto-memory
-(`MEMORY.md`), but designed to work across agents, with opencode as the primary target.
+Rovo Dev, Cursor, etc.) "remember."
 
 ## Current status
 
-**Design phase complete.** Full spec written and approved through all design sections.
-Not yet started: implementation plan, or any skill code.
+**Implementation complete.** Skill is built, tested, committed, and pushed.
 
-- **Spec (source of truth):** `docs/superpowers/specs/2026-06-20-learnings-skill-design.md`
-- **Next step:** create the implementation plan (use the `writing-plans` skill), then
-  build the skill (use `skill-creator`).
-- The project dir is **not yet a git repo**.
+- **Repo:** `github.com/jinhuanlei/auto-learnings`
+- **Local dir:** `/Users/leijinhuan/Documents/code/auto-learnings`
+- **Skills install:** `~/.claude/skills/auto-learnings` → symlink to local dir (live)
+- **Spec:** `docs/superpowers/specs/2026-06-20-learnings-skill-design.md`
 
-## Locked design decisions
+### Committed files
+
+| File | Purpose |
+|------|---------|
+| `SKILL.md` | All skill behavior |
+| `log-learning.sh` | The only script — mechanical append |
+| `evals/evals.json` | 3 test cases |
+| `README.md` | User-facing usage guide |
+| `.gitignore` | Ignores workspace/, *.bak, .DS_Store, HANDOFF.md |
+
+### Gitignored
+
+- `auto-learnings-workspace/` — eval run artifacts from skill-creator
+- `HANDOFF.md` — this file
+
+## Locked design decisions (unchanged from original)
 
 Architecture: **pure SKILL.md + markdown store + exactly one shell script.**
 
@@ -28,58 +41,71 @@ Architecture: **pure SKILL.md + markdown store + exactly one shell script.**
 |------|----------|
 | Capture scope | Corrections + Preferences + Project Facts + Debug Insights |
 | Store | `~/.learnings/global.md` + `<project>/.learnings/project.md` |
-| Format | 4 fixed sections; entries `- [YYYY-MM-DD] (agent) text`; **newest-last**; **source tag included**; header carries `schema: v1` marker |
-| Capture trigger | AI judges every turn; acts **immediately** (no batching) |
-| Confirm policy | **Confirm every write** before logging |
-| Dedup | AI dedups in-context (learnings are auto-loaded); on dup/conflict ask skip/overwrite/append |
-| Scope routing | AI decides project vs global |
-| Recall / wiring | AI-driven **setup mode** adds a managed block to the global `AGENTS.md` instructing the agent to read the learnings files at session start. **No blind appends to user configs** — judgment edits are the AI's job, shown as a diff + confirmed. Generic for ~99% of non-Claude-Code agents. |
-| Scripts | **Only one:** `log-learning.sh`, invoked by absolute path inside the skill dir (no install.sh, no PATH/exec footprint). Exists because weak models (MiniMax-M3, glm-5.2) would botch markdown appends/timestamps. |
-| Setup / list / review / delete / migrate | **All AI-driven**, no scripts |
-| Migrate mode | AI-driven import (CLAUDE.md, notes, other agents' memory, dumped skills) + schema upgrade. Imported entries stamped `(migrated)` with the migration date. Imports call `log-learning.sh`; in-place schema upgrades back up the file first, then rewrite + diff. |
+| Format | 4 fixed sections; entries `- [YYYY-MM-DD] (agent) text`; newest-last; source tag included; header carries `schema: v1` marker |
+| Capture trigger | AI judges every turn; acts immediately (no batching) |
+| Confirm policy | Confirm every write before logging |
+| Dedup | AI dedups in-context; on dup/conflict ask skip/overwrite/append |
+| Scope routing | Heuristic list: path/convention → project; style/cross-project → global; uncertain → ask |
+| Scripts | Only one: `log-learning.sh`, invoked by absolute path `~/.claude/skills/auto-learnings/log-learning.sh` |
+| Setup / list / review / delete / migrate | All AI-driven, no scripts |
 
-### `log-learning.sh` contract
+## Setup mode — supported agents
 
-```
-log-learning.sh --scope <global|project> \
-                --section <corrections|preferences|facts|insights> \
-                --agent <agent-name> \
-                --text "<one-line content>"
-```
-Mechanical only: resolve file → map section flag to header (`facts`→`## Project Facts`,
-`insights`→`## Debug Insights`) → create skeleton (with `schema: v1`) if missing →
-flatten text to one line → build `- [<date +%F>] (<agent>) <text>` (date from system,
-never the model) → insert newest-last in the section → non-zero exit on any failure.
+| Agent | Config file |
+|-------|------------|
+| opencode | `~/.config/opencode/AGENTS.md` |
+| Claude Code | `~/.claude/CLAUDE.md` |
+| Rovo Dev | `~/.rovodev/AGENTS.md` |
+| Cursor / Other | user provides path |
 
-### Guiding principle
+## Agent name tags
 
-**Scripts are dumb and reliable; the AI is smart and flexible.** Only the
-highest-frequency, determinism-sensitive operation (capture) is scripted. Everything
-requiring judgment is the AI's job.
+| Agent | `--agent` tag |
+|-------|--------------|
+| Claude Code | `claude-code` |
+| opencode | `opencode` |
+| Rovo Dev | `rovo-dev` |
 
-## Environment notes
+## Grilling decisions (all locked)
 
-- Primary working dir: `/Users/jinhuanlei/Documents/code/self-learning-skill`
-- Skills live in `~/.claude/skills/` (shared by opencode via Claude Code compat)
-- opencode global config: `~/.config/opencode/` has **two** files — `opencode.json`
-  (plugins/mcp) and `opencode.jsonc` (permissions/providers). Neither has an
-  `instructions` field. (We chose the AGENTS.md approach, so this no longer matters
-  for wiring, but note it if revisiting.)
-- opencode has **no native auto-memory** — only static `AGENTS.md` / `CLAUDE.md` /
-  `instructions` field.
-- opencode global AGENTS.md target: `~/.config/opencode/AGENTS.md`.
-- Claude Code is the **accepted exception** (reads `CLAUDE.md`, not `AGENTS.md`) — its
-  wiring is out of scope for v1.
+| # | Decision |
+|---|----------|
+| 1 | Script path hardcoded: `~/.claude/skills/auto-learnings/log-learning.sh` |
+| 2 | Confirmation UI: structured block Scope/Section/Text + yes/no/edit |
+| 3 | Dedup: semantic same-meaning, lean toward flagging, show both side-by-side |
+| 4 | append-on-conflict: immediately after existing entry (AI writes directly, not script) |
+| 5 | Agent name map: claude-code, opencode, rovo-dev; fallback short lowercase |
+| 6 | Setup trigger: auto-prompt on first capture if ~/.learnings/ missing; explicit anytime |
+| 7 | Missing AGENTS.md/CLAUDE.md: create it, show full new file in diff, single confirm |
+| 8 | Block placement: AI reads file and picks most natural spot by judgment |
+| 9 | edit behavior: ask "What would you like to change?" → regenerate → loop |
+| 10 | Script failure: report error, stop. No fallback write. |
+| 11 | Scope routing: heuristic list; uncertain → ask |
+| 12 | Delete: AI file tools only; script stays append-only |
+| 13 | Migrate ambiguity: Unclassified bucket in preview; user assigns before write |
+| 14 | Activation: always-on capture; management commands on explicit request only |
+| 15 | Recall wiring: AGENTS.md/CLAUDE.md block only; SKILL.md assumes learnings loaded |
 
-## Suggested skills (in order)
+## Migration plan (from self-improvement skill)
 
-1. **`writing-plans`** — create the implementation plan from the spec (the terminal
-   transition from brainstorming).
-2. **`skill-creator`** — scaffold and build the skill once the plan exists.
+- **Decision:** Option A — migrate then retire
+- **self-improvement skill location:** `~/.rovodev/skills/self-improvement/`
+- **Trigger:** `migrate learnings` — user will provide path to their LEARNINGS.md at runtime
+- **Format difference:** self-improvement uses rich LRN-xxx structured entries; auto-learnings uses one-liners. Migrate extracts the `Learning:` field from each entry.
 
-## Open items / future work
+## Open items
 
-- Claude Code `CLAUDE.md` wiring (deferred).
-- Optional opencode `instructions`-field force-injection for harder recall guarantees
-  (deferred; AGENTS.md instruction preferred for genericity).
-- `git init` the project before implementation if version control is wanted.
+- **Description optimizer:** `run_loop.py` was running when session closed. Iteration 1 showed recall=0% (skill not auto-triggering). Kill with `kill $(pgrep -f run_loop)` if still running. Re-run with:
+  ```sh
+  cd ~/.claude/skills/skill-creator
+  python3 -m scripts.run_loop \
+    --eval-set /Users/leijinhuan/Documents/code/auto-learnings/auto-learnings-workspace/trigger-eval-set.json \
+    --skill-path /Users/leijinhuan/Documents/code/auto-learnings \
+    --model claude-sonnet-4-6 \
+    --max-iterations 5 \
+    --verbose
+  ```
+  If it finished, results are in `/tmp/run_loop.log` — look for `best_description` and apply to SKILL.md frontmatter.
+
+- **Cursor AGENTS.md path:** unknown, user to provide at setup time.
+- **self-improvement retirement:** pending migration being run.
