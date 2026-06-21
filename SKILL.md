@@ -144,8 +144,8 @@ Read the learnings files. Flag entries that are stale (likely no longer true), c
 
      1. opencode     → ~/.config/opencode/AGENTS.md
      2. Claude Code  → ~/.claude/CLAUDE.md
-     3. Cursor       → provide path (e.g. ~/.cursor/AGENTS.md)
-     4. Rovo Dev     → provide path
+     3. Rovo Dev     → ~/.rovodev/AGENTS.md
+     4. Cursor       → provide path (e.g. ~/.cursor/AGENTS.md)
      5. Other        → provide path to your global AGENTS.md or CLAUDE.md
    ```
 

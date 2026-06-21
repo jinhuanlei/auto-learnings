@@ -61,7 +61,8 @@ Run once on each machine. The agent will:
 2. Ask which agent(s) to configure — choose any combination:
    - **opencode** → `~/.config/opencode/AGENTS.md`
    - **Claude Code** → `~/.claude/CLAUDE.md`
-   - **Cursor / Rovo Dev / Other** → you provide the path
+   - **Rovo Dev** → `~/.rovodev/AGENTS.md`
+   - **Cursor / Other** → you provide the path
 3. Show the exact diff for each config file
 4. Write everything on a single confirmation
 
