@@ -66,11 +66,12 @@ Use the `AskUserQuestion` tool (not plain text) so the user gets a navigable opt
 - **options:**
   - `{ label: "Yes", description: "Log this entry now." }`
   - `{ label: "No", description: "Drop it silently." }`
-  - `{ label: "Edit", description: "Change the scope, section, or text before saving." }`
+
+`AskUserQuestion` auto-appends an **Other** free-text option, so don't add an explicit Edit choice.
 
 On **Yes** → proceed to step 5.
 On **No** → drop silently.
-On **Edit** → ask "What would you like to change?" → user replies → regenerate the full block → loop back to Step 4.
+On **any free-text / Other answer** → treat the text as edit instructions: apply them to the scope, section, or text, regenerate the block, and loop back to Step 4.
 
 ### Step 5 — Write
 
