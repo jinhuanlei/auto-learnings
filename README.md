@@ -163,6 +163,10 @@ The global block already points at `./.learnings/project.md`, so any repo's proj
 
 ## Install
 
-The skill lives at `~/.claude/skills/auto-learnings/` (symlinked from this repo).
+The skill lives at `~/.claude/skills/auto-learnings/` (symlinked from this repo root).
 
-To install on a new machine, copy or symlink this directory to `~/.claude/skills/auto-learnings/`.
+To install on a new machine:
+
+```sh
+ln -s /path/to/auto-learnings ~/.claude/skills/auto-learnings
+```

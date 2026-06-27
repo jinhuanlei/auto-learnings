@@ -78,7 +78,7 @@ On **any free-text / Other answer** → treat the text as edit instructions: app
 For a project-scoped entry, first note whether `./.learnings/project.md` already exists — Step 6 needs to know whether this capture is what created it. Then run:
 
 ```sh
-sh ~/.claude/skills/auto-learnings/log-learning.sh \
+sh ~/.claude/skills/auto-learnings/scripts/log-learning.sh \
   --scope   <global|project> \
   --section <corrections|preferences|facts|insights> \
   --agent   <your-tag> \
@@ -86,6 +86,40 @@ sh ~/.claude/skills/auto-learnings/log-learning.sh \
 ```
 
 If the script exits non-zero, report the error message to the user and stop. Do not write the entry directly as a fallback — the script exists to guarantee correct formatting.
+
+### Step 5b — Claude Code native memory (Claude Code agent only)
+
+If the current agent is **Claude Code**, also write the same learning to Claude Code's built-in memory store. This makes it available in Claude Code sessions even without the learnings-skill recall block loaded.
+
+Map section → memory type:
+
+| auto-learnings section | Claude Code memory type |
+|------------------------|------------------------|
+| `corrections` | `feedback` |
+| `preferences` | `feedback` (or `user` if it describes the user's role/style) |
+| `facts` | `project` (project-scoped) · `reference` (global) |
+| `insights` | `feedback` |
+
+Route by scope:
+- **global** → `~/.claude/memory/` (available in every project)
+- **project** → `~/.claude/projects/<slug>/memory/` (find the slug from your system context — it's the project memory path the system prompt references)
+
+Write a memory file to the appropriate directory using the standard frontmatter format:
+
+```markdown
+---
+name: <kebab-slug>
+description: <one-line summary>
+metadata:
+  type: <feedback|user|project|reference>
+---
+
+<same text as the auto-learnings entry>
+```
+
+Then add a pointer line to `MEMORY.md` in the same directory.
+
+Skip this step silently if running as any other agent (opencode, Rovo Dev, Cursor, etc.) — they have no Claude Code memory store.
 
 ### Step 6 — Offer project recall wiring (first project capture only)
 
