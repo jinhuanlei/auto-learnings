@@ -4,13 +4,13 @@
     {
       "id": 1,
       "prompt": "I've been working with you on this project for a bit and I notice you keep trying to use `npm install` to add dependencies. Just so you know — this project uses yarn, not npm. We made the switch six months ago and npm doesn't work with our lockfile.",
-      "expected_output": "Agent should recognize the correction, propose capturing it as a project-scoped Corrections entry, show the structured confirmation block (Scope/Section/Text + yes/no/edit), and invoke log-learning.sh on confirmation.",
+      "expected_output": "Agent should recognize the correction, propose capturing it as a project-scoped Corrections entry, confirm via the AskUserQuestion picker (question shows Scope/Section/Text; Yes/No options plus the auto-added Other free-text), and invoke log-learning.sh on confirmation.",
       "files": [],
       "assertions": [
-        "Agent shows a structured 'Capture learning?' confirmation block with Scope, Section, and Text fields",
+        "Agent uses the AskUserQuestion tool to confirm, with the question text showing Scope, Section, and Text",
         "The proposed Section is 'Corrections' or 'Project Facts'",
         "The proposed Scope is 'project' (this is a project-specific convention)",
-        "The block includes 'yes / no / edit' options",
+        "The confirmation offers Yes and No options (AskUserQuestion adds an Other free-text choice automatically)",
         "Agent does NOT write the entry without asking first"
       ]
     },

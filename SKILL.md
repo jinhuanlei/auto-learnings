@@ -23,6 +23,8 @@ description: >
 
 Work through these steps in the same turn the signal fires.
 
+User-facing decisions use the `AskUserQuestion` tool so the user gets a navigable picker — that covers Step 4 (and the non-git fork in Step 2). The inline `skip / overwrite / append` and `yes / no` prompts elsewhere are fine as plain text because they're rare branches, not the common save path.
+
 ### Step 1 — Check setup
 
 If `~/.learnings/` does not exist and this is the first capture attempt in the session, pause:
@@ -35,10 +37,20 @@ If yes → run Setup Mode below, then continue capture. If no → skip for this 
 
 Apply the first matching rule:
 
-1. Learning references a specific file path, repo convention, or project-specific tool **and the current directory is a git repo** → **project** (`./.learnings/project.md`)
+1. Learning references a specific file path, repo convention, or project-specific tool → **project** (`./.learnings/project.md`)
 2. Personal style, cross-project workflow, or applies regardless of codebase → **global** (`~/.learnings/global.md`)
-3. Current directory is **not a git repo** → treat as a casual chat session; skip project scope entirely and route to global if the learning is worth keeping, or drop it if it's context-specific to the conversation.
-4. Genuinely uncertain → ask: "Should this be project-specific or global?"
+3. Genuinely uncertain → ask: "Should this be project-specific or global?"
+
+If the current directory is **not a git repo** and you're about to route to **project**, use the `AskUserQuestion` tool to let the user pick. Folding the scope choice and the save confirmation into one question avoids prompting twice — picking a location here also confirms the save, so **skip Step 4** afterward and go straight to Step 5 (project learnings will live in a `./.learnings/` folder in the current directory):
+
+- **question:** `"Heads up — this isn't a git repo, so project learnings would just sit in a ./.learnings/ folder here. Where should this <text> go?"`
+- **header:** `"Learning scope"`
+- **options:**
+  - `{ label: "Project", description: "Save to ./.learnings/project.md in this directory." }`
+  - `{ label: "Global", description: "Save to ~/.learnings/global.md (available everywhere)." }`
+  - `{ label: "Don't save", description: "Drop it." }`
+
+On **Project** / **Global** → write to that scope (Step 5). On **Don't save** → drop silently. On **Other** → treat as edit instructions per Step 4.
 
 ### Step 3 — Dedup
 
