@@ -1,5 +1,9 @@
 ---
 name: auto-learnings
+files:
+  - SKILL.md
+  - scripts/
+  - evals/
 description: >
   Persistent cross-session memory for coding work: captures corrections, preferences, project facts, and debug insights to a markdown store (~/.learnings/ and ./.learnings/) so future sessions remember them. ALWAYS invoke this skill when the user manages their memory or learnings — "set up learnings", "show" or "list my learnings", "review my learnings", "forget X" or "remove that from learnings", and "migrate" / "import my notes or CLAUDE.md into learnings" must each trigger it. ALSO invoke it to capture knowledge mid-session: when the user corrects you ("no, use X not Y", "we use yarn not npm"), states a preference ("always use...", "I prefer...", "don't do..."), reveals a durable project fact (paths, conventions, where things live), or shares a hard-won debug insight — propose logging it, even if they never say the words "remember", "learning", or "memory". When unsure whether something is worth persisting across sessions, consult this skill.
 ---
